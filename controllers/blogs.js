@@ -1,32 +1,72 @@
 const express = require("express");
-const { Blog } = require("../models");
+const { Blog, User } = require("../models");
+
+const { authProvider } = require("../utils/authorization");
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
-	const blog = await Blog.create({
-		...req.body,
-	});
-	res.status(200).json(blog);
-});
+// middleware to find a blog by id
+const blogFinder = async (req, _, next) => {
+	req.blog = await Blog.findByPk(req.params.id);
+	next();
+};
 
+// list all blogs
 router.get("/", async (_, res) => {
 	const allBlogs = await Blog.findAll({
 		attributes: ["author", "url", "title", "likes"],
+		include: {
+			model: User,
+			attributes: ["name"],
+		},
 	});
 
 	res.status(200).json(allBlogs);
 });
 
-router.delete("/:id", async (req, res) => {
-	const blogToDelete = await Blog.findByPk(req.params.id);
+// post a new blog
+router.post("/", authProvider, async (req, res) => {
+	const blog = await Blog.create({
+		...req.body,
+		likes: 0,
+		userId: req.user.id,
+	});
 
-	if (!blogToDelete) {
-		return res.status(404).json({ error: "Invalid blog id." });
+	res.status(201).json(blog);
+});
+
+// delete a blog by id
+router.delete("/:id", authProvider, blogFinder, async (req, res) => {
+	if (!req.user) {
+		return res.status(401).json({ error: "Unauthorized." });
 	}
 
-	await blogToDelete.destroy();
+	if (!req.blog) {
+		return res.status(404).json({ error: "Invalid blog ID." });
+	}
+
+	if (req.blog.userId.toString() !== req.user.id.toString()) {
+		return res.status(403).json({ error: "Forbidden: This is not your blog." });
+	}
+
+	await req.blog.destroy();
+
 	res.status(204).send();
+});
+
+// like a blog by id
+router.put("/:id", blogFinder, async (req, res) => {
+	if (req.blog) {
+		await req.blog.update({
+			likes: Number.parseInt(JSON.stringify(req.blog.likes)) + 1,
+		});
+
+		res.status(200).json({
+			likes: req.blog.likes,
+		});
+	} else {
+		res.status(404).send();
+	}
 });
 
 module.exports = router;
