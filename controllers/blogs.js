@@ -13,12 +13,32 @@ const blogFinder = async (req, _, next) => {
 
 // list all blogs
 router.get("/", async (_, res) => {
+	// search query
+	const where = {};
+
+	if (req.query.search) {
+		where[Op.or] = [
+			{
+				title: {
+					[Op.substring]: req.query.search,
+				},
+			},
+			{
+				author: {
+					[Op.substring]: req.query.search,
+				},
+			},
+		];
+	}
+
 	const allBlogs = await Blog.findAll({
 		attributes: ["author", "url", "title", "likes"],
 		include: {
 			model: User,
 			attributes: ["name"],
 		},
+		where,
+		order: [["likes", "DESC"]],
 	});
 
 	res.status(200).json(allBlogs);
