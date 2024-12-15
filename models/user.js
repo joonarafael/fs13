@@ -23,14 +23,14 @@ User.init(
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
-		hashedPassword: {
+		passwordHash: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
 	},
 	{
 		defaultScope: {
-			attributes: { exclude: ["hashedPassword"] },
+			attributes: { exclude: ["passwordHash"] },
 		},
 		modelName: "user",
 		sequelize,

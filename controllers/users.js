@@ -18,10 +18,35 @@ router.get("/", async (_, res) => {
 	res.status(200).json(users);
 });
 
+// get individual user
+router.get("/:id", async (req, res) => {
+	const where = {};
+
+	if (req.query.read) {
+		where.read = req.query.read === "true";
+	}
+
+	const user = await User.findByPk(req.params.id, {
+		include: [
+			{
+				model: Blog,
+				as: "readings",
+				attributes: {
+					exclude: ["userId"],
+				},
+				through: {
+					attributes: { exclude: ["userId", "blogId"] },
+					where,
+				},
+			},
+		],
+	});
+
+	res.status(200).json(user);
+});
+
 // register
 router.post("/", async (req, res) => {
-	console.log("POST request to /api/users");
-
 	const body = req.body;
 
 	if (!body.password || body.password.length < 3) {
@@ -35,10 +60,10 @@ router.post("/", async (req, res) => {
 	const user = await User.create({
 		name: body.name,
 		username: body.username,
-		hashedPassword,
+		passwordHash: hashedPassword,
 	});
 
-	const safeUser = { ...user.get(), hashedPassword: undefined };
+	const safeUser = { ...user.get(), passwordHash: undefined };
 
 	res.status(201).json(safeUser);
 });

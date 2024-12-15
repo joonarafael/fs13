@@ -1,0 +1,8 @@
+POST http://localhost:3000/api/blogs HTTP/1.1
+content-type: application/json
+authorization: Bearer <token>
+{
+    "author": "John Doe",
+    "title": "My first blog",
+    "url": "http://www.myfirstblog.com"
+}

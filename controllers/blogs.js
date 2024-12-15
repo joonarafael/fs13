@@ -5,14 +5,14 @@ const { authProvider } = require("../utils/authorization");
 
 const router = express.Router();
 
-// middleware to find a blog by id
+// middleware to find a blog by id (id as request parameter)
 const blogFinder = async (req, _, next) => {
 	req.blog = await Blog.findByPk(req.params.id);
 	next();
 };
 
 // list all blogs
-router.get("/", async (_, res) => {
+router.get("/", async (req, res) => {
 	// search query
 	const where = {};
 

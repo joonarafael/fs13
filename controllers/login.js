@@ -10,12 +10,20 @@ const router = express.Router();
 router.post("/", async (request, response) => {
 	const { username, password } = request.body;
 
+	if (!username || !password) {
+		return response.status(400).json({
+			error: "Username or password missing.",
+		});
+	}
+
 	const user = await User.findOne({
 		where: {
 			username: username,
 		},
-		attributes: ["id", "username", "hashedPassword"],
+		attributes: ["id", "username", "passwordHash"],
 	});
+
+	console.log(user);
 
 	if (!user) {
 		return response.status(401).json({
@@ -23,7 +31,7 @@ router.post("/", async (request, response) => {
 		});
 	}
 
-	const passwordMatch = await bcrypt.compare(password, user.hashedPassword);
+	const passwordMatch = await bcrypt.compare(password, user.passwordHash);
 
 	if (!passwordMatch) {
 		return response.status(401).json({
