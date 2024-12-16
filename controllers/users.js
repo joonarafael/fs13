@@ -20,8 +20,11 @@ router.get("/", async (_, res) => {
 
 // get individual user
 router.get("/:id", async (req, res) => {
+	// construct search query
 	const where = {};
 
+	// with ?=read=true, only return read blogs
+	// with ?=read=false, only return unread blogs
 	if (req.query.read) {
 		where.read = req.query.read === "true";
 	}

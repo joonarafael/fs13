@@ -13,7 +13,7 @@ const blogFinder = async (req, _, next) => {
 
 // list all blogs
 router.get("/", async (req, res) => {
-	// search query
+	// construct search query
 	const where = {};
 
 	if (req.query.search) {

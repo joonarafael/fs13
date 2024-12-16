@@ -1,8 +1,8 @@
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const express = require("express");
-const jwt = require("jsonwebtoken");
 
-const { User } = require("../models");
+const { User, Session } = require("../models");
 
 const router = express.Router();
 
@@ -23,8 +23,6 @@ router.post("/", async (request, response) => {
 		attributes: ["id", "username", "passwordHash"],
 	});
 
-	console.log(user);
-
 	if (!user) {
 		return response.status(401).json({
 			error: "Invalid username or password.",
@@ -39,16 +37,16 @@ router.post("/", async (request, response) => {
 		});
 	}
 
-	const userForToken = {
-		username: user.username,
-		id: user.id,
-	};
+	const sessionToken = crypto.randomBytes(32).toString("hex");
 
-	const token = jwt.sign(userForToken, process.env.JWT_SECRET);
+	await Session.create({
+		userId: user.id,
+		token: sessionToken,
+	});
 
 	response
 		.status(200)
-		.send({ token, username: user.username, name: user.name });
+		.send({ token: sessionToken, username: user.username, name: user.name });
 });
 
 module.exports = router;

@@ -1,20 +1,35 @@
-const jwt = require("jsonwebtoken");
-
-const { User } = require("../models");
+const { User, Session } = require("../models");
 
 const authProvider = async (req, res, next) => {
 	const authorization = req.get("authorization");
 
 	if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
 		try {
-			const decodedToken = jwt.verify(
-				authorization.substring(7),
-				process.env.JWT_SECRET
-			);
-			req.userId = decodedToken.id;
+			// extract session token
+			const sessionToken = authorization.substring(7);
 
+			// check that the session actually exists
+			const session = await Session.findOne({
+				where: { token: sessionToken },
+				include: User,
+			});
+
+			if (!session) {
+				return res.status(401).json({ error: "Unauthorized." });
+			}
+
+			req.userId = session.userId;
+
+			// check that the user actually exists
 			const user = await User.findByPk(req.userId);
+
+			if (!user) {
+				return res.status(401).json({ error: "Unauthorized." });
+			}
+
+			// user & session OK, execute authorization
 			req.user = user;
+			req.sessionToken = sessionToken;
 		} catch (error) {
 			console.log(error);
 			return res.status(401).json({ error: "Invalid authorization token." });

@@ -1,5 +1,5 @@
 const express = require("express");
-const { Blog, User, ReadingList } = require("../models");
+const { Blog, ReadingList } = require("../models");
 
 const { authProvider } = require("../utils/authorization");
 

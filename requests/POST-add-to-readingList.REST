@@ -3,5 +3,5 @@ content-type: application/json
 authorization: Bearer <token>
 
 {
-    "blogId": 6
+    "blogId": 0
 }

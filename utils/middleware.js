@@ -23,7 +23,7 @@ const errorHandler = (error, _, response, next) => {
 const unknownEndpointHandler = (_, response) => {
 	response
 		.status(404)
-		.send({ error: "This is not the URL you are looking for." });
+		.send({ error: "These are not the endpoints you are looking for..." });
 };
 
 module.exports = {

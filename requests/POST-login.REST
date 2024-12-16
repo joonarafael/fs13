@@ -3,5 +3,5 @@ content-type: application/json
 
 {
     "username": "john.doe@mal.me",
-    "password": "<password>"
+    "password": "<token>"
 }

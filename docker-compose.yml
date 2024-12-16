@@ -4,7 +4,7 @@ services:
     image: postgres:14
     environment:
       POSTGRES_USER: fs13-dev
-      POSTGRES_PASSWORD: public_password_to_github
+      POSTGRES_PASSWORD: public_password_to_github # use .env file for Docker compose as well in actual production environment
       POSTGRES_DB: blogdb
     ports:
       - "5432:5432"
